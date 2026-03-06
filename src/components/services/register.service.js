@@ -1,6 +1,6 @@
-import axios from "axios";
+import api from "./api";
 
 export async function registerUser(dataForm) {
-  const { data } = await axios.post("/api/users/signup", dataForm);
+  const { data } = await api.post("/users/signup", dataForm);
   return data;
 }

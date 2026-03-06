@@ -1,6 +1,6 @@
-import axios from "axios";
+import api from "./api";
 
 export async function loginUser(dataForm) {
-  const { data } = await axios.post("/api/users/signin", dataForm);
+  const { data } = await api.post("/users/signin", dataForm);
   return data;
 }
