@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://route-posts.routemisr.com/api/v1",
+  baseURL: "https://route-posts.routemisr.com/api",
 });
 
 api.interceptors.request.use((config) => {
