@@ -633,7 +633,9 @@ function SuggestionsSidebar() {
                 <div key={id} className="flex items-center gap-2.5">
                   <div
                     className="cursor-pointer flex-shrink-0"
-                    onClick={() => navigate(`/users/${id}`)}
+                    onClick={() =>
+                      navigate(`/users/${id}`, { state: { profile: person } })
+                    }
                   >
                     <Avatar
                       src={photo}
@@ -646,7 +648,9 @@ function SuggestionsSidebar() {
                   </div>
                   <div
                     className="flex-1 min-w-0 cursor-pointer"
-                    onClick={() => navigate(`/users/${id}`)}
+                    onClick={() =>
+                      navigate(`/users/${id}`, { state: { profile: person } })
+                    }
                   >
                     <p className="text-xs font-semibold text-gray-800 truncate hover:text-green-600 transition-colors">
                       {person.name || "User"}

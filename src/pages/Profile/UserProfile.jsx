@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   Card,
   CardBody,
@@ -11,14 +11,56 @@ import {
 import api from "../../components/services/api";
 import { useUser } from "../../components/context/userContext";
 
+function ImageLightbox({ src, onClose }) {
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <button
+        className="absolute top-4 right-4 text-white/70 hover:text-white"
+        onClick={onClose}
+      >
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <img
+        src={src}
+        alt="Profile"
+        className="max-w-sm max-h-[90vh] object-contain rounded-full shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      />
+    </div>
+  );
+}
+
 export default function UserProfile() {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user: me } = useUser();
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(location.state?.profile || null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [connected, setConnected] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -27,6 +69,7 @@ export default function UserProfile() {
       return;
     }
     setLoading(true);
+
     api
       .get("/posts?limit=100")
       .then((res) => {
@@ -36,8 +79,8 @@ export default function UserProfile() {
         );
         if (userPosts.length > 0) {
           setProfile(userPosts[0].user);
-          setPosts(userPosts);
         }
+        setPosts(userPosts);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -102,6 +145,10 @@ export default function UserProfile() {
 
   return (
     <div className="bg-gray-50 min-h-screen py-10 px-4">
+      {lightboxOpen && photoSrc && (
+        <ImageLightbox src={photoSrc} onClose={() => setLightboxOpen(false)} />
+      )}
+
       <div className="max-w-2xl mx-auto space-y-4">
         <Button
           size="sm"
@@ -130,13 +177,18 @@ export default function UserProfile() {
           <CardBody className="p-6">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-4">
-                <Avatar
-                  src={photoSrc}
-                  name={profile.name?.[0]?.toUpperCase() || "U"}
-                  className="w-20 h-20 text-2xl"
-                  isBordered
-                  color="success"
-                />
+                <div
+                  className={`${photoSrc ? "cursor-pointer" : ""}`}
+                  onClick={() => photoSrc && setLightboxOpen(true)}
+                >
+                  <Avatar
+                    src={photoSrc}
+                    name={profile.name?.[0]?.toUpperCase() || "U"}
+                    className="w-20 h-20 text-2xl hover:opacity-90 transition-opacity"
+                    isBordered
+                    color="success"
+                  />
+                </div>
                 <div>
                   <h2 className="text-xl font-bold text-gray-800">
                     {profile.name || "User"}
@@ -156,7 +208,7 @@ export default function UserProfile() {
                 className="font-semibold"
                 onPress={() => setConnected((p) => !p)}
               >
-                {connected ? "✓ Connected" : "Connect"}
+                {connected ? "Connected" : "Connect"}
               </Button>
             </div>
 
